@@ -1,0 +1,34 @@
+name: Terraform Azure Deployment
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에서 푸시할 때 트리거됩니다.
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.0.0  # 필요한 Terraform 버전으로 설정
+
+    - name: Authenticate to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}  # GitHub Secrets에 저장된 서비스 프린시펄 정보
+
+    - name: Initialize Terraform
+      run: terraform init
+
+    - name: Terraform Plan
+      run: terraform plan
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve
